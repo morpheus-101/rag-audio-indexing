@@ -2,3 +2,4 @@ data/
 rag-audio-env/
 todo.txt
 all_packages_list.txt
+.env
