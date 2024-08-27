@@ -15,7 +15,7 @@ def save_as_pickle_file(directory: str, filename: str, data: object) -> None:
         None
     """
     full_path = os.path.join(directory, filename)
-    with open(full_path, 'wb') as file:
+    with open(full_path, "wb") as file:
         pickle.dump(data, file)
 
 
@@ -29,6 +29,6 @@ def import_pkl_file(file_path):
     Returns:
     data: The data loaded from the pickle file.
     """
-    with open(file_path, 'rb') as file:
+    with open(file_path, "rb") as file:
         data = pickle.load(file)
     return data

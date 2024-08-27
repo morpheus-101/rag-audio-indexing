@@ -2,15 +2,13 @@ from pytubefix import YouTube
 from pytubefix.exceptions import VideoUnavailable
 
 
-def download_audio(video_url: str,
-                   video_name: str,
-                   output_dir: str) -> None:
+def download_audio(video_url: str, video_name: str, output_dir: str) -> None:
     """
     Download audio from a YouTube video.
 
     Args:
         video_url (str): The URL of the YouTube video.
-        video_name (str): The name to be used for the output audio file 
+        video_name (str): The name to be used for the output audio file
             (without extension).
         output_dir (str): The directory where the audio file will be saved.
 
@@ -22,7 +20,7 @@ def download_audio(video_url: str,
         Exception: For any other errors that occur during the download process.
 
     Example:
-        download_audio("https://www.youtube.com/watch?v=dQw4w9WgXcQ", 
+        download_audio("https://www.youtube.com/watch?v=dQw4w9WgXcQ",
             "never_gonna_give_you_up", "/downloads/")
         Downloading audio...
         Audio downloaded: /downloads/never_gonna_give_you_up.mp3

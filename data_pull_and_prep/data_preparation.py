@@ -1,5 +1,5 @@
-from typing import List, Tuple
-import whisper
+from typing import List, Tuple, Dict, Any
+import whisper  # type: ignore
 from llama_index.core.node_parser import SentenceSplitter
 
 
@@ -17,17 +17,24 @@ def transcribe(audio_file_path: str) -> List[Tuple[int, str, float, float]]:
         start time, and end time.
     """
     model = whisper.load_model("base")
-    result = model.transcribe(audio_file_path)
-    return [(segment["id"],
-             segment["text"],
-             segment["start"],
-             segment["end"])
-            for segment in result["segments"]]
+    result: Dict[str, Any] = model.transcribe(audio_file_path)
+
+    segments: List[Dict[str, Any]] = result["segments"]
+
+    return [
+        (
+            int(segment.get("id", 0)),
+            str(segment.get("text", "")),
+            float(segment.get("start", 0.0)),
+            float(segment.get("end", 0.0)),
+        )
+        for segment in segments
+    ]
 
 
 def map_characters_to_timestamps(
-        transcription: List[Tuple[int, str, float, float]]
-        ) -> List[Tuple[str, float]]:
+    transcription: List[Tuple[int, str, float, float]]
+) -> List[Tuple[str, float]]:
     """
     Maps characters to their corresponding timestamps in a transcription.
 
@@ -60,10 +67,12 @@ def map_characters_to_timestamps(
 
 
 class CreateCustomTextChunks:
-    def __init__(self,
-                 transcription_with_char_timestamps: List[Tuple[str, float]],
-                 chunk_size: int = 1024,
-                 chunk_overlap: int = 200) -> None:
+    def __init__(
+        self,
+        transcription_with_char_timestamps: List[Tuple[str, float]],
+        chunk_size: int = 1024,
+        chunk_overlap: int = 200,
+    ) -> None:
         """
         Initialize the DataPreparation object.
 
@@ -81,8 +90,8 @@ class CreateCustomTextChunks:
 
         self._get_full_text_from_char_timestamps()
         self.text_parser: SentenceSplitter = SentenceSplitter(
-            chunk_size=self.chunk_size,
-            chunk_overlap=self.chunk_overlap)
+            chunk_size=self.chunk_size, chunk_overlap=self.chunk_overlap
+        )
 
     def _get_full_text_from_char_timestamps(self) -> None:
         full_text_string: str = ""
@@ -90,8 +99,8 @@ class CreateCustomTextChunks:
             full_text_string += char
         self.full_text_string = full_text_string
 
-    def _get_start_end_idx(self, all_text_chunks: List[str]
-                           ) -> List[Tuple[int, int]]:
+    def _get_start_end_idx(
+            self, all_text_chunks: List[str]) -> List[Tuple[int, int]]:
         text_chunks_start_end_idx = []
         for i, text_chunk in enumerate(all_text_chunks):
             if text_chunk not in self.full_text_string:
@@ -102,8 +111,9 @@ class CreateCustomTextChunks:
                 text_chunks_start_end_idx.append((start_idx, end_idx))
         return text_chunks_start_end_idx
 
-    def _get_time_stamps(self, start_end_idx: List[Tuple[int, int]]
-                         ) -> List[Tuple[float, float]]:
+    def _get_time_stamps(
+        self, start_end_idx: List[Tuple[int, int]]
+    ) -> List[Tuple[float, float]]:
         text_chunks_time_stamps = []
         for start_idx, end_idx in start_end_idx:
             start_time = self.transcription_with_char_timestamps[start_idx][1]
@@ -112,17 +122,19 @@ class CreateCustomTextChunks:
         return text_chunks_time_stamps
 
     def _combine_text_chunks_with_timestamps(
-            self, all_text_chunks: List[str],
-            all_text_chunk_timestamps: List[Tuple[float, float]]
-            ) -> List[Tuple[str, Tuple[float, float]]]:
+        self,
+        all_text_chunks: List[str],
+        all_text_chunk_timestamps: List[Tuple[float, float]],
+    ) -> List[Tuple[str, Tuple[float, float]]]:
         text_chunks_with_timestamps = []
         for i in range(len(all_text_chunks)):
-            text_chunks_with_timestamps.append((all_text_chunks[i],
-                                                all_text_chunk_timestamps[i]))
+            text_chunks_with_timestamps.append(
+                (all_text_chunks[i], all_text_chunk_timestamps[i])
+            )
         return text_chunks_with_timestamps
 
-    def create_custom_text_chunks(self
-                                  ) -> List[Tuple[str, Tuple[float, float]]]:
+    def create_custom_text_chunks(
+            self) -> List[Tuple[str, Tuple[float, float]]]:
         text_chunks = []
         text_chunks = self.text_parser.split_text(self.full_text_string)
         start_end_idx = self._get_start_end_idx(text_chunks)

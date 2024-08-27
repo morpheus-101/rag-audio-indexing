@@ -1,7 +1,7 @@
 from dataclasses import dataclass
 from typing import Optional
 from typing import List, Tuple
-from pinecone import Pinecone, ServerlessSpec
+from pinecone import Pinecone, ServerlessSpec  # type: ignore
 from llama_index.vector_stores.pinecone import PineconeVectorStore
 from llama_index.core.schema import TextNode
 from llama_index.llms.openai import OpenAI
@@ -55,31 +55,34 @@ class CustomRAG:
         self.api_keys = APIKeys()
         self.api_keys.pinecone_api_key = pinecone_api_key
         self.api_keys.openai_api_key = openai_api_key
-        self.create_pinecone_index = (create_pinecone_index
-                                      if create_pinecone_index is not None
-                                      else CreatePineconeIndex())
+        self.create_pinecone_index = (
+            create_pinecone_index
+            if create_pinecone_index is not None
+            else CreatePineconeIndex()
+        )
         self.create_pinecone_index.index_name = index_name
-        self.openai_model = (openai_model
-                             if openai_model is not None
-                             else OpenAIModel())
-        self.extractors = (extractors
-                           if extractors is not None
-                           else Extractors())
+        self.openai_model = (
+            openai_model if openai_model is not None else OpenAIModel())
+        self.extractors = (
+            extractors if extractors is not None else Extractors())
         self.text_chunks_with_timestamps = text_chunks_with_timestamps
-        self.llm = OpenAI(model=self.openai_model.model_name,
-                          api_key=self.api_keys.openai_api_key)
+        self.llm = OpenAI(
+            model=self.openai_model.model_name,
+            api_key=self.api_keys.openai_api_key)
 
     def _setup_pinecone_vector_store(self) -> PineconeVectorStore:
         pc = Pinecone(api_key=self.api_keys.pinecone_api_key)
         if self.create_pinecone_index.index_name not in (
-          pc.list_indexes().names()):
+                pc.list_indexes().names()):
             pc.create_index(
                 name=self.create_pinecone_index.index_name,
                 dimension=self.create_pinecone_index.index_dimension,
                 metric=self.create_pinecone_index.index_metric,
                 spec=ServerlessSpec(
                     cloud=self.create_pinecone_index.index_cloud,
-                    region=self.create_pinecone_index.index_region))
+                    region=self.create_pinecone_index.index_region,
+                ),
+            )
 
         pinecone_index = pc.Index(self.create_pinecone_index.index_name)
         vector_store = PineconeVectorStore(pinecone_index=pinecone_index)
@@ -92,8 +95,7 @@ class CustomRAG:
             nodes.append(node)
         return nodes
 
-    def _generate_embeddings(
-            self, nodes):
+    def _generate_embeddings(self, nodes):
         self.embed_model = OpenAIEmbedding(
             api_key=self.api_keys.openai_api_key)
         for node in nodes:
@@ -109,20 +111,25 @@ class CustomRAG:
 
         pipeline = IngestionPipeline(
             transformations=[
-                TitleExtractor(nodes=self.extractors.title_extractor_nodes,
-                               llm=self.llm),
-                QuestionsAnsweredExtractor(questions=(
-                    self.extractors.questions_answered_extractor_questions),
-                                        llm=self.llm),
+                TitleExtractor(
+                    nodes=self.extractors.title_extractor_nodes,
+                    llm=self.llm),
+                QuestionsAnsweredExtractor(
+                    questions=(
+                      self.extractors.questions_answered_extractor_questions),
+                    llm=self.llm,
+                ),
             ])
         nodes = await pipeline.arun(nodes=nodes, in_place=False)
         nodes = self._generate_embeddings(nodes)
 
         for i, node in enumerate(nodes):
-            node.extra_info['start_timestamp'] = float(
-                self.text_chunks_with_timestamps[i][1][0])
-            node.extra_info['end_timestamp'] = float(
-                self.text_chunks_with_timestamps[i][1][1])
+            node.extra_info["start_timestamp"] = float(
+                self.text_chunks_with_timestamps[i][1][0]
+            )
+            node.extra_info["end_timestamp"] = float(
+                self.text_chunks_with_timestamps[i][1][1]
+            )
         self.vector_store.add(nodes)  # type: ignore
 
 
@@ -135,6 +142,7 @@ class CustomRetriever:
     def retrieve(self, query: str) -> VectorStoreQueryResult:
         query_embedding = self.embed_model.get_query_embedding(query)
         vector_store_query = VectorStoreQuery(
-            query_embedding=query_embedding, similarity_top_k=3)
+            query_embedding=query_embedding, similarity_top_k=3
+        )
         query_result = self.vector_store.query(vector_store_query)
         return query_result
