@@ -130,6 +130,7 @@ class CustomRAG:
             node.extra_info["end_timestamp"] = float(
                 self.text_chunks_with_timestamps[i][1][1]
             )
+        self.all_nodes = nodes
         self.vector_store.add(nodes)  # type: ignore
 
 
