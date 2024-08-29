@@ -3,6 +3,8 @@ import basic_rag.rag as rag
 import random
 import textwrap
 from typing import List, Tuple
+import asyncio
+
 
 
 class RetrieveAndAnswer:
@@ -15,7 +17,6 @@ class RetrieveAndAnswer:
             vector_store=self.ingestion_obj.vector_store,
         )
         query_result = custom_retriever_obj.retrieve(query=query_str)
-
         response_synthesizer_obj = response_synthesizer.HierarchicalSummarizer(
             llm=self.ingestion_obj.llm
         )
@@ -24,6 +25,27 @@ class RetrieveAndAnswer:
             query_str=query_str
         )
         return response
+    
+
+class aRetrieveAndAnswer:
+    def __init__(self, ingestion_obj: rag.CustomRAG) -> None:
+        self.ingestion_obj = ingestion_obj
+
+    def answer(self, query_str: str):
+        custom_retriever_obj = rag.CustomRetriever(
+            embed_model=self.ingestion_obj.embed_model,
+            vector_store=self.ingestion_obj.vector_store,
+        )
+        query_result = custom_retriever_obj.retrieve(query=query_str)
+        response_synthesizer_obj = (
+            response_synthesizer.aHierarchicalSummarizer(
+                llm=self.ingestion_obj.llm)
+                )
+        response_cr = response_synthesizer_obj.generate_response_hs(
+            retrieved_nodes=query_result.nodes,  # type: ignore
+            query_str=query_str
+        )
+        return response_cr
 
 
 class RandomQuestionAndTopics:
