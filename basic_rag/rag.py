@@ -7,7 +7,8 @@ from llama_index.core.schema import TextNode
 from llama_index.llms.openai import OpenAI
 from llama_index.core.extractors import (
     QuestionsAnsweredExtractor,
-    TitleExtractor,
+    SummaryExtractor,
+    KeywordExtractor,
 )
 from llama_index.core.ingestion import IngestionPipeline
 from llama_index.embeddings.openai import OpenAIEmbedding
@@ -36,9 +37,10 @@ class OpenAIModel:
 
 
 @dataclass
-class Extractors:
-    title_extractor_nodes: int = 5
-    questions_answered_extractor_questions: int = 3
+class Extractors_config:
+    no_of_questions: int = 5
+    no_keywords_to_extract: int = 10
+    summary_type: str = "self"
 
 
 class CustomRAG:
@@ -50,7 +52,7 @@ class CustomRAG:
         text_chunks_with_timestamps: List[Tuple[str, Tuple[float, float]]],
         create_pinecone_index: Optional[CreatePineconeIndex] = None,
         openai_model: Optional[OpenAIModel] = None,
-        extractors: Optional[Extractors] = None,
+        extractors: Optional[Extractors_config] = None,
     ):
         self.api_keys = APIKeys()
         self.api_keys.pinecone_api_key = pinecone_api_key
@@ -62,18 +64,22 @@ class CustomRAG:
         )
         self.create_pinecone_index.index_name = index_name
         self.openai_model = (
-            openai_model if openai_model is not None else OpenAIModel())
+            openai_model if openai_model is not None else OpenAIModel()
+        )
         self.extractors = (
-            extractors if extractors is not None else Extractors())
+            extractors if extractors is not None else Extractors_config()
+        )
         self.text_chunks_with_timestamps = text_chunks_with_timestamps
         self.llm = OpenAI(
             model=self.openai_model.model_name,
-            api_key=self.api_keys.openai_api_key)
+            api_key=self.api_keys.openai_api_key,
+        )
 
     def _setup_pinecone_vector_store(self) -> PineconeVectorStore:
         pc = Pinecone(api_key=self.api_keys.pinecone_api_key)
         if self.create_pinecone_index.index_name not in (
-                pc.list_indexes().names()):
+            pc.list_indexes().names()
+        ):
             pc.create_index(
                 name=self.create_pinecone_index.index_name,
                 dimension=self.create_pinecone_index.index_dimension,
@@ -97,7 +103,8 @@ class CustomRAG:
 
     def _generate_embeddings(self, nodes):
         self.embed_model = OpenAIEmbedding(
-            api_key=self.api_keys.openai_api_key)
+            api_key=self.api_keys.openai_api_key
+        )
         for node in nodes:
             node_embedding = self.embed_model.get_text_embedding(
                 node.get_content(metadata_mode="all")  # type: ignore
@@ -108,18 +115,20 @@ class CustomRAG:
     async def create_text_nodes_and_add_to_vector_store(self) -> None:
         self.vector_store = self._setup_pinecone_vector_store()
         nodes = self._create_text_nodes()
-
+        list_of_extractors = [
+            QuestionsAnsweredExtractor(
+                questions=(self.extractors.no_of_questions), llm=self.llm
+            ),
+            SummaryExtractor(
+                llm=self.llm, summaries=[self.extractors.summary_type]
+            ),
+            KeywordExtractor(
+                llm=self.llm, keywords=self.extractors.no_keywords_to_extract
+            ),
+        ]
         pipeline = IngestionPipeline(
-            transformations=[
-                TitleExtractor(
-                    nodes=self.extractors.title_extractor_nodes,
-                    llm=self.llm),
-                QuestionsAnsweredExtractor(
-                    questions=(
-                      self.extractors.questions_answered_extractor_questions),
-                    llm=self.llm,
-                ),
-            ])
+            transformations=list_of_extractors  # type: ignore
+        )
         nodes = await pipeline.arun(nodes=nodes, in_place=False)
         nodes = self._generate_embeddings(nodes)
 
@@ -135,9 +144,10 @@ class CustomRAG:
 
 
 class CustomRetriever:
-    def __init__(self, embed_model: OpenAIEmbedding,
-                 vector_store: PineconeVectorStore):
-        self.embed_model = embed_model
+    def __init__(
+        self, embed_model: OpenAIEmbedding, vector_store: PineconeVectorStore
+    ):
+        self.embed_model = embed_model  # type: ignore
         self.vector_store = vector_store
 
     def retrieve(self, query: str) -> VectorStoreQueryResult:

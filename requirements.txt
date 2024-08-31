@@ -1,10 +1,15 @@
 pytubefix==6.13.0
 openai==1.42.0
 openai-whisper==20231117
-llama-index==0.11.1
+llama-index
 python-dotenv==1.0.1
 pinecone-client==5.0.1
 pinecone-plugin-inference==1.0.3
 pinecone-plugin-interface==0.0.7
-llama-index-vector-stores-pinecone==0.2.1
+llama-index-vector-stores-pinecone
 matplotlib==3.9.2
+graspologic==3.4.1
+graspologic-native==1.2.1
+future==1.0.0
+llama-index-graph-stores-neo4j
+
