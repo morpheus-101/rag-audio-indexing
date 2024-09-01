@@ -9,28 +9,23 @@ from llama_index.core.graph_stores.types import (
     Relation,
 )
 from llama_index.core.async_utils import run_jobs
-from typing import Any, List, Callable, Union
+from typing import Any, List, Callable, Union, Dict
 import asyncio
 import nest_asyncio
 import warnings
 from graph_rag.prompts import KG_TRIPLET_EXTRACT_TMPL
 from graph_rag.utils import default_parser
-from dataclasses import dataclass
+# from dataclasses import dataclass
 
 warnings.filterwarnings("ignore")
 
 nest_asyncio.apply()
 
 
-# @dataclass
-# class GraphRAGConfig:
-#     default_llm: LLM = OpenAI(model="gpt-3.5-turbo")
-
-
 class GraphRAGExtractor(TransformComponent):
     """Extract entities and relationships from a graph.
 
-    Uses an LLM and a simple prompt + output parsing to extract paths 
+    Uses an LLM and a simple prompt + output parsing to extract paths
         (i.e. triples) and entity, relation descriptions from text.
 
     Args:
@@ -54,7 +49,6 @@ class GraphRAGExtractor(TransformComponent):
 
     def __init__(
         self,
-        # llm: LLM = GraphRAGConfig().default_llm,
         llm: LLM = OpenAI(model="gpt-3.5-turbo"),
         extract_prompt: Union[
             str, PromptTemplate
@@ -63,7 +57,18 @@ class GraphRAGExtractor(TransformComponent):
         max_paths_per_chunk: int = 10,
         num_workers: int = 10,
     ) -> None:
+        """
+        Initialize the GraphRAGExtractor.
 
+        Args:
+            llm (LLM): The language model to use for extraction.
+            extract_prompt (Union[str, PromptTemplate]): The prompt
+                template for extraction.
+            parse_fn (Callable): The function to parse LLM output.
+            max_paths_per_chunk (int): Maximum number of paths to
+                extract per chunk.
+            num_workers (int): Number of workers for parallel processing.
+        """
         if isinstance(extract_prompt, str):
             extract_prompt = PromptTemplate(extract_prompt)
 
@@ -77,23 +82,47 @@ class GraphRAGExtractor(TransformComponent):
 
     @classmethod
     def class_name(cls) -> str:
+        """
+        Get the name of the class.
+
+        Returns:
+            str: The name of the class.
+        """
         return "GraphExtractor"
 
     def __call__(
         self, nodes: List[BaseNode], show_progress: bool = False, **kwargs: Any
     ) -> List[BaseNode]:
-        """Extract triples from nodes."""
+        """
+        Extract triples from nodes.
+
+        Args:
+            nodes (List[BaseNode]): List of nodes to extract triples from.
+            show_progress (bool): Whether to show progress during extraction.
+            **kwargs: Additional keyword arguments.
+
+        Returns:
+            List[BaseNode]: List of nodes with extracted triples.
+        """
         return asyncio.run(
             self.acall(nodes, show_progress=show_progress, **kwargs)
         )
 
     async def _aextract(self, node: BaseNode) -> BaseNode:
-        """Extract triples from a node."""
+        """
+        Extract triples from a single node asynchronously.
+
+        Args:
+            node (BaseNode): The node to extract triples from.
+
+        Returns:
+            BaseNode: The node with extracted triples added to its metadata.
+        """
         assert hasattr(node, "text")
 
-        text = node.get_content(metadata_mode="llm")
+        text: str = node.get_content(metadata_mode="llm")
         try:
-            llm_response = await self.llm.apredict(
+            llm_response: str = await self.llm.apredict(
                 self.extract_prompt,
                 text=text,
                 max_knowledge_triplets=self.max_paths_per_chunk,
@@ -103,29 +132,30 @@ class GraphRAGExtractor(TransformComponent):
             entities = []
             entities_relationship = []
 
-        existing_nodes = node.metadata.pop(KG_NODES_KEY, [])
-        existing_relations = node.metadata.pop(KG_RELATIONS_KEY, [])
-        entity_metadata = node.metadata.copy()
+        existing_nodes: List[EntityNode] = node.metadata.pop(KG_NODES_KEY, [])
+        existing_relations: List[Relation] = node.metadata.pop(
+                                                KG_RELATIONS_KEY, [])
+        entity_metadata: Dict[str, Any] = node.metadata.copy()
         for entity_dict in entities:
             entity_metadata["entity_description"] = entity_dict[
                 "entity_description"
             ]
-            entity_node = EntityNode(
+            entity_node: EntityNode = EntityNode(
                 name=entity_dict["entity_name"],
                 label=entity_dict["entity_type"],
                 properties=entity_metadata,
             )
             existing_nodes.append(entity_node)
 
-        relation_metadata = node.metadata.copy()
+        relation_metadata: Dict[str, Any] = node.metadata.copy()
         for relationship_dict in entities_relationship:
-            subj = relationship_dict["source_entity"]
-            obj = relationship_dict["target_entity"]
-            rel = relationship_dict["relation"]
-            description = relationship_dict["relationship_description"]
+            subj: str = relationship_dict["source_entity"]
+            obj: str = relationship_dict["target_entity"]
+            rel: str = relationship_dict["relation"]
+            description: str = relationship_dict["relationship_description"]
 
             relation_metadata["relationship_description"] = description
-            rel_node = Relation(
+            rel_node: Relation = Relation(
                 label=rel,
                 source_id=subj,
                 target_id=obj,
@@ -140,8 +170,18 @@ class GraphRAGExtractor(TransformComponent):
     async def acall(
         self, nodes: List[BaseNode], show_progress: bool = False, **kwargs: Any
     ) -> List[BaseNode]:
-        """Extract triples from nodes async."""
-        jobs = []
+        """
+        Extract triples from nodes asynchronously.
+
+        Args:
+            nodes (List[BaseNode]): List of nodes to extract triples from.
+            show_progress (bool): Whether to show progress during extraction.
+            **kwargs: Additional keyword arguments.
+
+        Returns:
+            List[BaseNode]: List of nodes with extracted triples.
+        """
+        jobs: List[asyncio.Task] = []
         for node in nodes:
             jobs.append(self._aextract(node))
 

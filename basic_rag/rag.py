@@ -14,12 +14,16 @@ from llama_index.core.ingestion import IngestionPipeline
 from llama_index.embeddings.openai import OpenAIEmbedding
 from llama_index.core.vector_stores import VectorStoreQuery
 from llama_index.core.vector_stores.types import VectorStoreQueryResult
+import os
+from dotenv import load_dotenv
 
+# Load environment variables from .env file
+load_dotenv()
 
 @dataclass
 class APIKeys:
-    pinecone_api_key: str = ""
-    openai_api_key: str = ""
+    pinecone_api_key: str = os.getenv("PINECONE_API_KEY", "")
+    openai_api_key: str = os.getenv("OPENAI_API_KEY", "")
 
 
 @dataclass
@@ -46,8 +50,6 @@ class Extractors_config:
 class CustomRAG:
     def __init__(
         self,
-        pinecone_api_key: str,
-        openai_api_key: str,
         index_name: str,
         text_chunks_with_timestamps: List[Tuple[str, Tuple[float, float]]],
         create_pinecone_index: Optional[CreatePineconeIndex] = None,
@@ -55,8 +57,6 @@ class CustomRAG:
         extractors: Optional[Extractors_config] = None,
     ):
         self.api_keys = APIKeys()
-        self.api_keys.pinecone_api_key = pinecone_api_key
-        self.api_keys.openai_api_key = openai_api_key
         self.create_pinecone_index = (
             create_pinecone_index
             if create_pinecone_index is not None
