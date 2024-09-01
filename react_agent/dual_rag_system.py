@@ -59,7 +59,7 @@ class DualRAGSystem:
             query (str): The query string to be processed by both RAG systems.
 
         Returns:
-            Tuple[str, str]: A tuple containing the responses from the 
+            Tuple[str, str]: A tuple containing the responses from the
                 Basic RAG and Graph RAG systems, respectively.
         """
         async def basic_rag_query() -> str:
