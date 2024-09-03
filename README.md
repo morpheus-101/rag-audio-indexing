@@ -1,6 +1,7 @@
 
 # 🎙️ PodProbe: Podcast Navigation and Comprehension Tool
 
+
 ## 📚 Table of Contents
 1. [Overview](#overview)
 2. [Motivation](#motivation)
@@ -14,7 +15,9 @@
 10. [Contributing](#contributing)
 11. [License](#license)
 
-## 🌟 Overview
+---
+
+## Overview
 
 PodProbe is an innovative solution designed to address the challenges of podcast discovery and content navigation. By leveraging advanced techniques in Retrieval-Augmented Generation (RAG), innovative response synthesis, and agentic workflows, this system transforms the way users interact with long-form audio content. These are the key goals of the project:
 
@@ -25,7 +28,9 @@ PodProbe is an innovative solution designed to address the challenges of podcast
 
 The Dual RAG approach, combining Basic RAG for efficient text retrieval and Graph RAG for complex relationship mapping, offers a sophisticated solution to unlock the full potential of podcasts as a knowledge resource. This system not only improves the listener experience but also addresses the inefficiencies in current podcast consumption methods, making vast audio libraries more accessible and valuable to users.
 
-## 🎯 Motivation
+---
+
+## Motivation
 
 Podcasts have emerged as a rich source of information and entertainment, yet they remain largely unindexed by traditional search engines and large language models. This gap in accessibility presents several significant challenges:
 
@@ -43,7 +48,9 @@ The proliferation of long-form podcasts, exemplified by popular shows like those
 
 These issues underscore the pressing need for advanced tools and methodologies to enhance podcast discoverability, content navigation, and information extraction. Such innovations would not only improve the listener experience but also unlock the full potential of podcasts as a knowledge resource.
 
-## 💡 Solution
+---
+
+## Solution
 
 This solution aims to create a sophisticated tool for indexing and querying podcasts and other audio content, prioritizing efficiency, accuracy, and insightful analysis. The key features of the solution include:
 
@@ -82,7 +89,9 @@ The Dual RAG system is built on two complementary pillars, each bringing unique 
 
 The Dual RAG system leverages the strengths of both components while mitigating their individual weaknesses, resulting in a more robust and comprehensive solution. By combining the speed and reliability of the Basic RAG with the complex relationship modeling of the Graph RAG, the system provides a powerful and versatile approach to podcast content analysis and retrieval.
 
-## 🚧 Project Status
+---
+
+## Project Status
 
 The project is currently in active development, aiming to create a sophisticated tool for podcast exploration and analysis. The system is designed to offer users two primary modes of interaction:
 
@@ -158,7 +167,9 @@ The system can process audio clips and provide comprehensive responses. Here's a
   - Containerizing the system using Docker
   - Deploying on Google Cloud Platform (GCP)
 
-## 🔑 Key Features
+---
+
+## Key Features
 
 - **🛠️ Customizable RAG Systems**: The codebase implements core functionalities from scratch, allowing for customization at every stage: Extraction, Storage, Retrieval, Response synthesis, Entity and relationship extraction
 - **🚀 Asynchronous Processing**: Concurrent execution of Basic and Graph RAG queries for optimal performance.
@@ -166,7 +177,9 @@ The system can process audio clips and provide comprehensive responses. Here's a
 - **🔍 Flexible Query Processing**: Simultaneous utilization of both RAG systems for diverse query types and robust results.
 - **🕸️ Community Detection**: Utilizes sophisticated graph algorithms to group related entities.
 
-## 🛠️ Technical Stack
+---
+
+## Technical Stack
 
 This system leverages a robust set of technologies and libraries:
 
@@ -179,7 +192,9 @@ This system leverages a robust set of technologies and libraries:
 - **pinecone**: Vector database for storing and querying text chunks for the Basic RAG.
 - **OpenAI Whisper**: Transcribes the audio to text.
 
-## 🚀 Installation and Setup
+---
+
+## Installation and Setup
 
 1. Clone the repository:
    ```
@@ -213,7 +228,9 @@ This system leverages a robust set of technologies and libraries:
 
 Refer to the demo notebooks for more details on how to use the system.
 
-## 📘 Usage Guide
+---
+
+## Usage Guide
 
 1. Initialize the DualRAGSystem:
    ```python
@@ -240,7 +257,9 @@ Refer to the demo notebooks for more details on how to use the system.
    basic_response, graph_response = asyncio.run(dual_rag.query_systems(query))
    ```
 
-## 📁 Repository Structure
+---
+
+## Repository Structure
 
 The repository is organized as follows:
 
@@ -256,10 +275,9 @@ The repository is organized as follows:
 - `data_pull_and_preprocessing/`: Includes code for transcribing and processing audio clips.
 - `data/`: Stores the audio clips used in the demo notebooks (git ignored).
 
-This structure allows for easy navigation and understanding of the project's components.
+---
 
-
-## 🤝 Contributing
+## Contributing
 
 Contributions to this project are welcome! Here's how you can contribute:
 
@@ -269,6 +287,10 @@ Contributions to this project are welcome! Here's how you can contribute:
 4. Push to your branch: `git push origin feature-name`.
 5. Submit a pull request with a comprehensive description of changes.
 
-## 📄 License
+---
+
+## License
 
 This project is licensed under the MIT License - see the [LICENSE.md](LICENSE.md) file for details.
+
+---
