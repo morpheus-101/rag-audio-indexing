@@ -13,7 +13,6 @@
 8. [Usage Guide](#usage-guide)
 9. [Repository Structure](#repository-structure)
 10. [Contributing](#contributing)
-11. [License](#license)
 
 ---
 
@@ -286,11 +285,5 @@ Contributions to this project are welcome! Here's how you can contribute:
 3. Implement your changes and commit them: `git commit -m 'Add some feature'`.
 4. Push to your branch: `git push origin feature-name`.
 5. Submit a pull request with a comprehensive description of changes.
-
----
-
-## License
-
-This project is licensed under the MIT License - see the [LICENSE.md](LICENSE.md) file for details.
 
 ---
