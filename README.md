@@ -10,8 +10,9 @@
 6. [Technical Stack](#technical-stack)
 7. [Installation and Setup](#installation-and-setup)
 8. [Usage Guide](#usage-guide)
-9. [Contributing](#contributing)
-10. [License](#license)
+9. [Repository Structure](#repository-structure)
+10. [Contributing](#contributing)
+11. [License](#license)
 
 ## 🌟 Overview
 
@@ -58,7 +59,7 @@ This solution aims to create a sophisticated tool for indexing and querying podc
 
 4. **Efficient Value Extraction**: Users can extract approximately 80% of the podcast's valuable content in about 20 minutes, significantly optimizing the information gathering process.
 
-This project is a proof of concept that demonstrates the feasibility of the approach. The system is not yet optimized for performance or scalability (refer to Future Enhancements section).
+This project is a proof of concept that demonstrates the feasibility of the approach. The system is not yet optimized for performance or scalability (refer to Project status section).
 
 The Dual RAG system is built on two complementary pillars, each bringing unique strengths to the table:
 
@@ -238,6 +239,25 @@ Refer to the demo notebooks for more details on how to use the system.
    query = "What are the main topics discussed in the audio?"
    basic_response, graph_response = asyncio.run(dual_rag.query_systems(query))
    ```
+
+## 📁 Repository Structure
+
+The repository is organized as follows:
+
+- `notebooks/`: Contains demo notebooks for audio processing, RAG creation, and usage.
+  - [`basic_rag_demo.ipynb`](notebooks/basic_rag_demo.ipynb): Shows how to create a basic rag from an audio clip.
+  - [`basic_rag_system_demo.ipynb`](notebooks/basic_rag_system_demo.ipynb): Demonstrates how to use the custom wrapper class to build the same basic RAG system described in basic_rag_demo.ipynb.
+  - [`graph_rag_demo.ipynb`](notebooks/graph_rag_demo.ipynb): Demonstrates the Graph RAG component.
+  - [`graph_rag_system_demo.ipynb`](notebooks/graph_rag_system_demo.ipynb): Demonstrates the Graph RAG system.
+  - [`dual_rag_system_demo.ipynb`](notebooks/dual_rag_system_demo.ipynb): Demonstrates the Dual RAG system.
+  - [`react_agent_demo.ipynb`](notebooks/react_agent_demo_wip.ipynb): Demonstrates the ReAct agent.(Work in progress!)
+- `graph_rag/`: Houses the core logic for the Graph RAG component.
+- `basic_rag/`: Contains the core logic for the Basic RAG component.
+- `data_pull_and_preprocessing/`: Includes code for transcribing and processing audio clips.
+- `data/`: Stores the audio clips used in the demo notebooks (git ignored).
+
+This structure allows for easy navigation and understanding of the project's components.
+
 
 ## 🤝 Contributing
 
